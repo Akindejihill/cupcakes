@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<ol id="cupcakeList">
+
+</ol>
+
+
+<body>
+    <form action = '/api/cupcakes' method = 'POST'>
+        <label for='flavor'>Flavor</label>
+        <input type='text' id='flavor' name='flavor'>
+        <br>
+        <label for='size'>Size</label>
+        <input type='text' id='size' name='size'>
+        <br>
+        <label for='rating'>Rating</label>
+        <input type='text' id='rating' name='rating'>
+        <br>
+        <label for='image'>Image</label>
+        <input type='text' id='image' name='image'>
+    </form>
+    <button type="button" id="submit">Submit</button>
+
+
+    <script src="http://unpkg.com/axios/dist/axios.js"></script>
+    <script>
+
+        let cupcakeList = document.getElementById('cupcakeList');
+        
+
+        async function getCupcakes(){
+            let request = await axios.get("http://localhost:5000/api/cupcakes");
+            console.log("got", request.data);
+            
+            return request.data['cupcakes'];
+        }
+
+        // let cupcakes = await getCupcakes();
+        // console.log(cupcakes);
+
+        
+        async function writeList(){
+            let cupcakes = await getCupcakes();
+            cupcakes.forEach( cupcake => {
+                console.log(cupcake);
+                let li = document.createElement('li');
+                li.innerHTML=`Flavor: ${cupcake['flavor']}, rating: ${cupcake['rating']}`;
+                cupcakeList.append(li); 
+            });
+        }
+
+        
+        writeList();
+
+        let flavorField = document.getElementById('flavor');
+        let sizeField = document.getElementById('size');
+        let ratingField = document.getElementById('rating');
+        let imageField = document.getElementById('image');
+        let button = document.getElementById('submit');
+
+        function updateList(cupcake){
+            console.log("We succesfully inserted:", cupcake);
+            console.log(cupcake.flavor);
+
+            let li = document.createElement('li');
+            li.innerHTML=`Flavor: ${cupcake.flavor}, rating: ${cupcake.rating}`;
+            cupcakeList.append(li);
+        }
+
+
+        async function updateData(){
+            let requestString = "";
+
+            requestString += `{"flavor" : "${flavorField.value}",`
+            requestString += `"size" : "${sizeField.value}",`
+            requestString += `"rating" : ${ratingField.value},`
+            requestString += `"image" : "${imageField.value}"}`
+
+            console.log(requestString)
+            if(flavorField.value && sizeField.value && ratingField.value){
+                let response = await axios.post(
+                    "/api/cupcakes",
+                    requestString,
+                    {
+                        headers: {
+                        // Overwrite Axios's automatically set Content-Type
+                        'Content-Type': 'application/json'
+                        }
+                    }
+                )
+                updateList(response.data)
+            }
+        }
+
+        button.addEventListener('click', e => {
+            updateData();
+        })
+
+    </script>
+
+</body>
+</html>
+
+
